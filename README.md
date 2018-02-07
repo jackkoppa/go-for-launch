@@ -20,6 +20,14 @@ http-server -p 8080
 ```
 * Project is now available at [http://localhost:8080/](http://localhost:8080/)
 
+## Fetch Most Recent
+* Follow instructions in `console-scripts/reddit-console-scripts.js`, copied below:
+1. Go to the reddit thread w/ locations: https://www.reddit.com/r/spacex/comments/7vg63x/rspacex_falcon_heavy_test_flight_official_launch/dttm08w/
+2. Copy this entire file (CTRL + A, CTRL + C)
+3. Paste into dev tools console (https://developers.google.com/web/tools/chrome-devtools/console/), press "Enter" 
+4. Wait for final message saying "Coordinates are ready!"
+5. Paste into `../manually-retrieved-coordinates.js` file, replacing everything (CTRL + A, CTRL + V)
+
 ## Notes
 * The site does not auto-update, and requires a fresh crawl of the reddit thread in order to retrieve the newest comments & coordinates, then a fresh push to the repo for GitHub pages to update.
 * This functionality could certainly be moved to a server, that relies on the reddit API (as well as the Geocoding API, which is already the case)
