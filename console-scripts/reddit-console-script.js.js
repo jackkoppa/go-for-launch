@@ -10,7 +10,7 @@
 // 4. Wait for final message saying "Coordinates are ready!"
 // 5. Paste into `../manually-retrieved-coordinates.js` file, replacing everything other than `COORDINATES = `
 
-const GEOCODE_KEY = 'AIzaSyBffhukdBQU5DXDmp3cqyQJeqcVaZpAPZw' // OK to include, given that it's set to only work on a single domain
+const GEOCODE_KEY = 'AIzaSyBffhukdBQU5DXDmp3cqyQJeqcVaZpAPZw' // Can use when running locally, as reddit.com/r/spacex is an allowed domain
 const GEO_URL = 'https://maps.googleapis.com/maps/api/geocode/json?';
 const COMMENT_REG_EXPS = [
     new RegExp(/([\w\u00C0-\u017E][\w\u00C0-\u017E\s\,]+)[iI][sS]\s[gG][oO].*/), // (City Name, State Name, Country Name, More Names) is Go {anything else}

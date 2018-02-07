@@ -1,3 +1,10 @@
+const MAPS_JS_KEY = 'AIzaSyAdgPk1lnEFCxgTSSk0sYUtG6kjwxfl78o'; // When running locally, replace with own key, as this is domain-controlled
+// see https://developers.google.com/maps/documentation/javascript/, "GET A KEY"
+
+(function setMapsScriptSrc() {
+    document.getElementById('maps-api').src = `https://maps.googleapis.com/maps/api/js?key=${MAPS_JS_KEY}&callback=initMap`;
+})();
+
 function initMap() {
     var center = { lat: 0, lng: 0 };
     var infowindow = new google.maps.InfoWindow();
