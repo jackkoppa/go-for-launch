@@ -40,4 +40,5 @@ initMap = () => {
     });
 
     document.getElementById('last-updated').innerText = UPDATED_DATE;
+    document.getElementById('mapped-points').innerText = COORDINATES.length;
 }
