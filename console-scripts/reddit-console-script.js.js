@@ -13,6 +13,7 @@ const GEOCODE_KEY = 'AIzaSyBffhukdBQU5DXDmp3cqyQJeqcVaZpAPZw' // Can use when ru
 const GEO_URL = 'https://maps.googleapis.com/maps/api/geocode/json?';
 const COMMENT_REG_EXPS = [
     new RegExp(/([\w\u00C0-\u017E][\w\u00C0-\u017E\s\,]+)[iI][sS]\s[gG][oO].*/), // (City Name, State Name, Country Name, More Names) is Go {anything else}
+    new RegExp(/([\w\u00C0-\u017E][\w\u00C0-\u017E\s\,]+)[wW][aA][sS]\s[gG][oO].*/), // (City Name, State Name, Country Name, More Names) was Go {anything else}
     new RegExp(/([\w\u00C0-\u017E][\w\u00C0-\u017E\s\,]+)[\s\.\,\-]+[gG][oO].*/), // (City Name, State Name, Country Name, More Names) - GO {anything else}
     new RegExp(/([\w\u00C0-\u017E]+,\s[\w\u00C0-\u017E]+)\s.*/) // (CityName, CountryName) {anything else}
 ]
