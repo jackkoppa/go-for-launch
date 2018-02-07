@@ -32,17 +32,27 @@
     <script src="./manually-retrieved-coordinates.js"></script>
     <script>
         function initMap() {
-            var uluru = { lat: 0, lng: 0 };
+            var center = { lat: 0, lng: 0 };
+            var infowindow = new google.maps.InfoWindow();
             var map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 2,
-                center: uluru
+                center: center
             });
 
             COORDINATES.forEach(coord => {
                 marker = new google.maps.Marker({
-                    position: coord,
+                    position: coord.location,
                     map: map
                 });
+
+                var marker, i;
+
+                google.maps.event.addListener(marker, 'click', (function(marker, i) {
+                    return function() {
+                        infowindow.setContent(coord.redditAddress); // to use Google-provided address, change to coord.formattedAddress
+                        infowindow.open(map, marker);
+                    }
+                })(marker, i))
             });
         }
     </script>
