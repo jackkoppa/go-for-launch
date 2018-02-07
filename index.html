@@ -69,7 +69,10 @@
                 google.maps.event.addListener(marker, 'click', (function(marker, i) {
                     return function() {
                         infowindow.setContent(`
-                            <div class="main-info">${coord.redditAddress}</div>
+                            <div class="main-info">
+                                <span>${coord.redditAddress}</span><br/>
+                                <a href="${coord.link}" title="Visit /u/${coord.user}'s Comment" target="_blank">/u/${coord.user}</a>
+                            </div>
                             <div class="secondary-info">
                                 <span class="title">Returned From Google Geocoding:</span>
                                 <p>${coord.formattedAddress}</p>

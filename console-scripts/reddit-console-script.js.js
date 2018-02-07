@@ -35,6 +35,11 @@ let comments = [];
 let coordinates = [];
 let client = new HttpClient();
 
+let findAncestor = (el, cls) => {
+    while ((el = el.parentElement) && !el.classList.contains(cls));
+    return el;
+}
+
 let clickComments = (spans) => {
     let moreCommentsLinks = spans[spans.length - 1].getElementsByTagName('a');
     let link = moreCommentsLinks && moreCommentsLinks[0]
@@ -65,7 +70,20 @@ let addComments = () => {
     
     Array.prototype.forEach.call(userElements, element => {
         let pTags = element.getElementsByTagName('p');
-        if (pTags[0] && pTags[0].innerText) comments.push(pTags[0].innerText);
+        let parentEntry = element.closest('div.entry');
+        let tagline = parentEntry && parentEntry.getElementsByClassName('tagline');
+        let authorTags = tagline && tagline[0] && tagline[0].getElementsByClassName('author');
+        let flatList = parentEntry && parentEntry.getElementsByClassName('flat-list');
+        let byLinkTags = flatList && flatList[0] && flatList[0].getElementsByClassName('bylink');
+        
+        if (pTags[0] && pTags[0].innerText) {
+            let newComment = {
+                text: pTags[0].innerText,
+                user: authorTags && authorTags[0] && authorTags[0].innerText,
+                link: byLinkTags && byLinkTags[0] && byLinkTags[0].href
+            }
+            comments.push(newComment)
+        };
     });
 }
 
@@ -74,10 +92,10 @@ let getCoordinates = (copyFn) => {
 
     let matchedComments = comments.map(comment => {
         let pattern = COMMENT_REG_EXPS.find(regExp => {
-            let match = regExp.exec(comment);
+            let match = regExp.exec(comment.text);
             return match && match[1]
         });
-        let confirmedMatch = pattern && pattern.exec(comment);
+        let confirmedMatch = pattern && pattern.exec(comment.text);
         let newComment = {};
         newComment.original = confirmedMatch && 
             confirmedMatch[1] &&
@@ -91,6 +109,8 @@ let getCoordinates = (copyFn) => {
                 .trim()
                 .replace(/[\.\,\-\s]+/g, '+') || 
             undefined;
+        newComment.user = comment.user;
+        newComment.link = comment.link;
         return newComment;
     });
 
@@ -106,7 +126,13 @@ let getCoordinates = (copyFn) => {
                     let parsed = JSON.parse(response);
                     if (parsed.status == 'OK') {
                         let result = parsed.results[0];
-                        let coords = {};
+                        let coords = {
+                            redditAddress: filteredComments[index].original,
+                            formattedAddress: result.formatted_address,
+                            location: result.geometry.location,
+                            user: filteredComments[index].user,
+                            link: filteredComments[index].link
+                        };
                         coords.redditAddress = filteredComments[index].original;
                         coords.formattedAddress = result.formatted_address;
                         coords.location = result.geometry.location;
