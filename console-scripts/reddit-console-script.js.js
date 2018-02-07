@@ -118,7 +118,7 @@ let getCoordinates = (copyFn) => {
     console.log(filteredComments, matchedComments);
     filteredComments.forEach((comment, index) => {
         let requestURL = `${GEO_URL}address=${filteredComments[index].formatted}&key=${GEOCODE_KEY}`;
-
+        console.log(filteredComments[index].formatted)
         client.get(requestURL, (response) => {
             if (response) {
                 try {
