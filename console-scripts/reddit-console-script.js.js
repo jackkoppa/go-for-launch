@@ -2,13 +2,12 @@
 *
 * Instructions
 *
-*
 */
 // 1. Go to the reddit thread w/ locations: https://www.reddit.com/r/spacex/comments/7vg63x/rspacex_falcon_heavy_test_flight_official_launch/dttm08w/
-// 2. Copy this entire file
+// 2. Copy this entire file (CTRL + A, CTRL + C)
 // 3. Paste into dev tools console (https://developers.google.com/web/tools/chrome-devtools/console/), press "Enter" 
 // 4. Wait for final message saying "Coordinates are ready!"
-// 5. Paste into `../manually-retrieved-coordinates.js` file, replacing everything other than `COORDINATES = `
+// 5. Paste into `../manually-retrieved-coordinates.js` file, replacing everything (CTRL + A, CTRL + V)
 
 const GEOCODE_KEY = 'AIzaSyBffhukdBQU5DXDmp3cqyQJeqcVaZpAPZw' // Can use when running locally, as reddit.com/r/spacex is an allowed domain
 const GEO_URL = 'https://maps.googleapis.com/maps/api/geocode/json?';
