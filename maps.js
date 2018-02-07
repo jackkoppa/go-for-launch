@@ -38,4 +38,6 @@ initMap = () => {
             }
         })(marker, i))
     });
+
+    document.getElementById('last-updated').innerText = UPDATED_DATE;
 }

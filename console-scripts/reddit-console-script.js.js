@@ -150,7 +150,9 @@ let getCoordinates = (copyFn) => {
 
     let finalCopyFn = copyFn;
     setTimeout(() => {
-        finalCopyFn(coordinates);
+        let copyString = `const COORDINATES = ${JSON.stringify(coordinates)}; 
+        const UPDATED_DATE = "${new Date().toUTCString()}"`
+        finalCopyFn(copyString);
         console.log('Coordinates are ready!')
         console.log('You can now Paste into the `../manually-retrieved-coordinates.js` file');
     }, 4000)
