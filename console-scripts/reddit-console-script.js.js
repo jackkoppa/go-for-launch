@@ -12,10 +12,12 @@
 const GEOCODE_KEY = 'AIzaSyBffhukdBQU5DXDmp3cqyQJeqcVaZpAPZw' // Can use when running locally, as reddit.com/r/spacex is an allowed domain
 const GEO_URL = 'https://maps.googleapis.com/maps/api/geocode/json?';
 const COMMENT_REG_EXPS = [
-    new RegExp(/([\w\u00C0-\u017E][\w\u00C0-\u017E\s\,]+)[iI][sS]\s[gG][oO].*/), // (City Name, State Name, Country Name, More Names) is Go {anything else}
-    new RegExp(/([\w\u00C0-\u017E][\w\u00C0-\u017E\s\,]+)[wW][aA][sS]\s[gG][oO].*/), // (City Name, State Name, Country Name, More Names) was Go {anything else}
-    new RegExp(/([\w\u00C0-\u017E][\w\u00C0-\u017E\s\,]+)[\s\.\,\-]+[gG][oO].*/), // (City Name, State Name, Country Name, More Names) - GO {anything else}
-    new RegExp(/([\w\u00C0-\u017E]+,\s[\w\u00C0-\u017E]+)\s.*/) // (CityName, CountryName) {anything else}
+    // (City Name, State Name, Country Name, More Names) {is|was|is a|was a} go {anything else}
+    new RegExp(/([\w\u00C0-\u017E][\w\u00C0-\u017E\s\,]+)(?:[iI][sS]|[wW][aA][sS])(?:\s+[aA])*\s+[gG][oO].*/), 
+    // (City Name, State Name, Country Name, More Names) - GO {anything else}
+    new RegExp(/([\w\u00C0-\u017E][\w\u00C0-\u017E\s\,]+)[\s\.\,\-]+[gG][oO].*/), 
+    // (CityName, CountryName) {anything else}
+    new RegExp(/([\w\u00C0-\u017E]+,\s[\w\u00C0-\u017E]+)\s.*/) 
 ]
 
 var HttpClient = function() {
@@ -116,10 +118,9 @@ let getCoordinates = (copyFn) => {
 
     let filteredComments = matchedComments.filter(comment => comment.formatted != null);
 
-    console.log(filteredComments, matchedComments);
+    console.log(`${filteredComments.length} matched, filtered comments`);
     filteredComments.forEach((comment, index) => {
         let requestURL = `${GEO_URL}address=${filteredComments[index].formatted}&key=${GEOCODE_KEY}`;
-        console.log(filteredComments[index].formatted)
         client.get(requestURL, (response) => {
             if (response) {
                 try {
