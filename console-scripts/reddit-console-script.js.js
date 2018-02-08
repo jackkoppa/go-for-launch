@@ -9,8 +9,12 @@
 // 4. Wait for final message saying "Coordinates are ready!"
 // 5. Paste into `../manually-retrieved-coordinates.js` file, replacing everything (CTRL + A, CTRL + V)
 
-const GEOCODE_KEY = 'AIzaSyBffhukdBQU5DXDmp3cqyQJeqcVaZpAPZw' // Can use when running locally, as reddit.com/r/spacex is an allowed domain
+// Can use when running locally, as the key is not domain-controlled
+// However, it's possible to exceed the daily limit, so you may want to generate your own key if you see network requests fail,
+// https://developers.google.com/maps/documentation/geocoding/start, "GET A KEY"
+const GEOCODE_KEY = 'AIzaSyBffhukdBQU5DXDmp3cqyQJeqcVaZpAPZw' 
 const GEO_URL = 'https://maps.googleapis.com/maps/api/geocode/json?';
+const GEO_API_MS_DELAY = 21 ;// Geocoding API is rate-limited; we need to delay our requests to stay under 50 per second
 const COMMENT_REG_EXPS = [
     // (City Name, State Name, Country Name, More Names) {is|was|is a|was a} go {anything else}
     new RegExp(/([\w\u00C0-\u017E][\w\u00C0-\u017E\s\,]+)(?:[iI][sS]|[wW][aA][sS])(?:\s+[aA])*\s+[gG][oO].*/), 
@@ -19,6 +23,7 @@ const COMMENT_REG_EXPS = [
     // (CityName, CountryName) {anything else}
     new RegExp(/([\w\u00C0-\u017E]+,\s[\w\u00C0-\u017E]+)\s.*/) 
 ]
+const COMMENT_MS_INTERVAL = 100; // how many milliseconds to wait before checking again if comments are loaded
 
 var HttpClient = function() {
     this.get = function(aUrl, aCallback) {
@@ -42,18 +47,24 @@ let findAncestor = (el, cls) => {
     return el;
 }
 
+let intervalsWaited = 0;
+let totalIntervalsWaited = 0;
 let clickComments = (spans) => {
     let moreCommentsLinks = spans[spans.length - 1].getElementsByTagName('a');
     let link = moreCommentsLinks && moreCommentsLinks[0]
-    if (link.innerText != 'loading...')
+    if (link.innerText != 'loading...' || intervalsWaited >= 10) {
         link.click();
+        intervalsWaited = 0;
+    }
 }
 
 let waitForAllComments = new Promise(resolve => {
     console.group('Clicking "More Comments" until all comments are loaded')
     let copyFn = window.copy;
-    let interval = setInterval(function() {
-        console.count('wait interval');
+    let interval = setInterval(function() {        
+        console.log(`have waited ${totalIntervalsWaited * COMMENT_MS_INTERVAL} for comments to load`);
+        intervalsWaited++;
+        totalIntervalsWaited++;
         let moreCommentsSpans = document.getElementsByClassName('morecomments');
         if (!moreCommentsSpans || moreCommentsSpans.length === 0 ) {
             console.groupEnd();
@@ -64,7 +75,7 @@ let waitForAllComments = new Promise(resolve => {
         } else {
             clickComments(moreCommentsSpans);
         }
-    }, 100)
+    }, COMMENT_MS_INTERVAL)
 });
 
 let addComments = () => {
@@ -117,46 +128,51 @@ let getCoordinates = (copyFn) => {
     });
 
     let filteredComments = matchedComments.filter(comment => comment.formatted != null);
-
     console.log(`${filteredComments.length} matched, filtered comments`);
+    
+
+    console.group('Retrieving coordinates from Google Geocoding API');
     filteredComments.forEach((comment, index) => {
         let requestURL = `${GEO_URL}address=${filteredComments[index].formatted}&key=${GEOCODE_KEY}`;
-        client.get(requestURL, (response) => {
-            if (response) {
-                try {
-                    let parsed = JSON.parse(response);
-                    if (parsed.status == 'OK') {
-                        let result = parsed.results[0];
-                        let coords = {
-                            redditAddress: filteredComments[index].original,
-                            formattedAddress: result.formatted_address,
-                            location: result.geometry.location,
-                            user: filteredComments[index].user,
-                            link: filteredComments[index].link
-                        };
-                        coords.redditAddress = filteredComments[index].original;
-                        coords.formattedAddress = result.formatted_address;
-                        coords.location = result.geometry.location;
-                        coordinates.push(coords);                       
-                    }  
-                }
-                catch (err) {
-                    console.error(`Failed to push response coordinates with err: ${err}`);
-                }
-            }            
-        });
+        setTimeout(() => {
+            client.get(requestURL, (response) => {
+                if (response) {
+                    try {
+                        let parsed = JSON.parse(response);
+                        if (parsed.status == 'OK') {
+                            let result = parsed.results[0];
+                            let coords = {
+                                redditAddress: filteredComments[index].original,
+                                formattedAddress: result.formatted_address,
+                                location: result.geometry.location,
+                                user: filteredComments[index].user,
+                                link: filteredComments[index].link
+                            };
+                            coords.redditAddress = filteredComments[index].original;
+                            coords.formattedAddress = result.formatted_address;
+                            coords.location = result.geometry.location;
+                            coordinates.push(coords);                       
+                        }                          
+                    }
+                    catch (err) {
+                        console.error(`Failed to push response coordinates with err: ${err}`);
+                    }
+                }            
+            });
+            if (index % 10 == 0) console.log(`Have requested coordinates for ${index} total comments`);
+        }, GEO_API_MS_DELAY * index)
     });
-
-    console.log('Please wait, retrieving coordinates now...');
 
     let finalCopyFn = copyFn;
     setTimeout(() => {
+        console.groupEnd();
         let copyString = `const COORDINATES = ${JSON.stringify(coordinates)}; 
         const UPDATED_DATE = "${new Date().toUTCString()}"`
         finalCopyFn(copyString);
-        console.log('Coordinates are ready!')
+        console.log('Coordinates are ready!');
+        console.log(`Retrieved ${coordinates.length} total coordinates`);
         console.log('You can now Paste into the `../manually-retrieved-coordinates.js` file');
-    }, 4000)
+    }, GEO_API_MS_DELAY * filteredComments.length + 3000) // delay by total execution time, + a buffer
 }
 
 waitForAllComments.then((copyFn) => {
